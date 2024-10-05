@@ -1,7 +1,6 @@
 import React from 'react';
 import { HomeFeedProvider } from '../context/HomeFeedContext';
-import ContainerMapper from '../components/ContainerMapper';
-import Slider from '../components/Slider';
+import ContainerMapper from '../components/HomeFeed/ContainerMapper';
 
 export default function HomeFeed() {
   return (

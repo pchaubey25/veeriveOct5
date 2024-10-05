@@ -66,13 +66,13 @@ export default function Header () {
                 <li>
                   Analyzer
                   <ul>
-                    <li onClick={() => handleMenuItemClick('/analyzer/sector')}>
+                    <li onClick={() => handleMenuItemClick('/sector-home')}>
                       Sector Analyzer
                     </li>
                     <li onClick={() => handleMenuItemClick('/analyzer/company')}>
                       Company Analyzer
                     </li>
-                    <li onClick={() => handleMenuItemClick('/analyzer/trend')}>
+                    <li onClick={() => handleMenuItemClick('/theme-home')}>
                       Trend Analyzer
                     </li>
                   </ul>

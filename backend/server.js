@@ -88,7 +88,7 @@ app.put('/api/admin/post-types/:id', authenticateUser, authorizeUser(['Admin', '
 app.delete('/api/admin/post-types/:id', authenticateUser, authorizeUser(['Admin', 'Moderator']), postTypesCltr.delete)
 
 //themes routes
-app.get('/api/themes', authenticateUser, companiesCltr.list)
+app.get('/api/themes', authenticateUser, themesCltr.list)
 
 //admin routes
 app.get('/api/admin/themes', authenticateUser, authorizeUser(['Admin', 'Moderator']), themesCltr.list)

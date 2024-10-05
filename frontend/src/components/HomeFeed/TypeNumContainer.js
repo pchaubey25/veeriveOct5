@@ -1,5 +1,5 @@
 import React from 'react';
-import '../html/css/TypeNumContainer.css'; // Import the CSS file
+import '../../html/css/TypeNumContainer.css'; // Import the CSS file
 
 export default function TypeNumContainer({
   dataForTypeNum,

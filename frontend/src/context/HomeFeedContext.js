@@ -108,7 +108,7 @@ export const HomeFeedProvider = ({ children }) => {
 
     fetchAdditionalData();
   }, []);
-
+  
   return (
     <HomeFeedContext.Provider value={{ 
       stories, 

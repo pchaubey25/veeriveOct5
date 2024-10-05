@@ -2,26 +2,38 @@ import Post from '../models/post-model.js'
 const postsCltr = {}
 
 postsCltr.list = async (req, res) => {
-    try {
-        // Extract context query parameter from the request
-        const { context } = req.query;
-
-        // If a context ID is provided, filter posts by context
-        let query = {};
-        if (context) {
-            const contextArray = context.split(',').map(id => id.trim());
-            query.context = { $in: contextArray };
-        }
-
-        // Fetch posts based on the query
-        const posts = await Post.find(query);
-        res.json(posts);
-        console.log('Filtered posts:', posts);
-    } catch (err) {
-        console.error('Error fetching posts:', err);
-        res.status(500).json({ error: err.message });
+    try{
+        const posts = await Post.find({})
+        res.json(posts)
+        console.log(posts)
+    } catch(err) {
+        console.log(err)
+        res.json(err)
     }
-};
+    
+}
+
+// postsCltr.list = async (req, res) => {
+//     try {
+//         // Extract context query parameter from the request
+//         const { context } = req.query;
+
+//         // If a context ID is provided, filter posts by context
+//         let query = {};
+//         if (context) {
+//             const contextArray = context.split(',').map(id => id.trim());
+//             query.context = { $in: contextArray };
+//         }
+
+//         // Fetch posts based on the query
+//         const posts = await Post.find(query);
+//         res.json(posts);
+//         console.log('Filtered posts:', posts);
+//     } catch (err) {
+//         console.error('Error fetching posts:', err);
+//         res.status(500).json({ error: err.message });
+//     }
+// };
 
 
 postsCltr.date = async (req, res) => {

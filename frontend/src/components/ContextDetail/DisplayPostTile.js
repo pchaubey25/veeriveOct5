@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
-import '../html/css/DisplayPostTile.css';
-import { HomeFeedContext } from '../context/HomeFeedContext'; // Assuming context is set up already
+import '../../html/css/DisplayPostTile.css';
+import { HomeFeedContext } from '../../context/HomeFeedContext'; // Assuming context is set up already
 
 const DisplayPostTile = ({ postTitle, summary }) => {
   // Combine sectors, subSectors, and signals into one array of tags

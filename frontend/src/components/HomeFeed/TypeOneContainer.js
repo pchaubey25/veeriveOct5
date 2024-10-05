@@ -1,5 +1,5 @@
 import React from 'react';
-import '../html/css/TypeOneContainer.css'; // Import the CSS file
+import '../../html/css/TypeOneContainer.css'; // Import the CSS file
 
 export default function TypeOneContainer () {
     return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import '../html/css/TypeTwoContainer.css';
+import '../../html/css/TypeTwoContainer.css';
 
 export default function TypeTwoContainer({
   contextTitle,

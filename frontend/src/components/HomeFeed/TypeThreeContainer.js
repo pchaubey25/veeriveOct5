@@ -1,5 +1,5 @@
 import React from 'react';
-import '../html/css/TypeThreeContainer.css';
+import '../../html/css/TypeThreeContainer.css';
 
 export default function TypeThreeContainer({
   contextTitle,

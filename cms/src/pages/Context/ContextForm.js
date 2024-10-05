@@ -4,11 +4,12 @@ import axios from '../../config/axios';
 import Select from 'react-select';
 import Quill from 'react-quill';
 import 'react-quill/dist/quill.snow.css'; // Import Quill styles
-import '../../html/css/Context.css'; // Import your updated CSS file
+import '../../html/css/Context.css';
 
 export default function ContextForm({ handleFormSubmit }) {
-    const { posts: postsData, contexts, contextsDispatch, sectors: sectorsData, subSectors: subSectorsData, signals: signalsData, subSignals: subSignalsData, themes: themesData, setIsFormVisible } = useContext(ContextContext);
+    const { posts: postsData, contexts, contextsDispatch, sectors: sectorsData, subSectors: subSectorsData, signals: signalsData, subSignals: subSignalsData, themes: themesData, setIsFormVisible, isFormVisible } = useContext(ContextContext);
     
+    // State for form inputs
     const [contextTitle, setContextTitle] = useState('');
     const [isTrending, setIsTrending] = useState(false);
     const [selectedSectors, setSelectedSectors] = useState([]);
@@ -16,7 +17,7 @@ export default function ContextForm({ handleFormSubmit }) {
     const [selectedSignalCategories, setSelectedSignalCategories] = useState([]);
     const [selectedSignalSubCategories, setSelectedSignalSubCategories] = useState([]);
     const [selectedThemes, setSelectedThemes] = useState([]);
-    const [selectedPosts, setSelectedPosts] = useState([]); // For posts
+    const [selectedPosts, setSelectedPosts] = useState([]); // New state for selected posts
     const [bannerShow, setBannerShow] = useState(false);
     const [homePageShow, setHomePageShow] = useState(false);
     const [bannerImage, setBannerImage] = useState('');
@@ -41,6 +42,7 @@ export default function ContextForm({ handleFormSubmit }) {
     useEffect(() => {
         if (contexts.editId) {
             const context = contexts.data.find((ele) => ele._id === contexts.editId);
+
             if (context) {
                 setContextTitle(context.contextTitle);
                 setIsTrending(context.isTrending);
@@ -48,15 +50,22 @@ export default function ContextForm({ handleFormSubmit }) {
                 setSelectedSubSectors(context.subSectors || []);
                 setSelectedSignalCategories(context.signalCategories || []);
                 setSelectedSignalSubCategories(context.signalSubCategories || []);
+                
+                // Set selected themes with the correct format for react-select
                 setSelectedThemes(context.themes.map(themeId => ({
                     value: themeId,
                     label: themesData.data.find(theme => theme._id === themeId)?.themeTitle || ''
                 })));
+                
+                // Set selected posts with the correct format for react-select
                 setSelectedPosts(context.posts.map(post => ({
-                    value: post.postId,
+                    value: post.postId, // Make sure to pass the correct postId
                     label: postsData.find(p => p._id === post.postId)?.postTitle || '',
-                    includeInContainer: post.includeInContainer
+                    includeInContainer: post.includeInContainer // Preserve the includeInContainer field
                 })));
+                
+                
+
                 setBannerShow(context.bannerShow);
                 setHomePageShow(context.homePageShow);
                 setBannerImage(context.bannerImage || '');
@@ -86,7 +95,7 @@ export default function ContextForm({ handleFormSubmit }) {
             setSelectedSignalCategories([]);
             setSelectedSignalSubCategories([]);
             setSelectedThemes([]);
-            setSelectedPosts([]);
+            setSelectedPosts([]); // Reset posts when adding a new context
             setBannerShow(false);
             setHomePageShow(false);
             setBannerImage('');
@@ -107,13 +116,144 @@ export default function ContextForm({ handleFormSubmit }) {
                 slide9: { title: '', description: '' },
                 slide10: { title: '', description: '' }
             });
+            
         }
+        
     }, [contexts.editId, contexts.data]);
+
+   
+
+    const filteredSubSectors = subSectorsData.data.filter(subSector =>
+        selectedSectors.includes(subSector.sectorId)
+    );
+
+    const filteredSignalSubCategories = subSignalsData.data.filter(subSignal =>
+        selectedSignalCategories.includes(subSignal.signalId)
+    );
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Form submission logic
+        
+        // Determine the container type based on the number of posts and dataForTypeNum
+        let containerType = 'Type-One'; // Default
+        const numOfPosts = selectedPosts.length;
+    
+        if (dataForTypeNum) {
+            containerType = 'Type-Num';
+        } else {
+            switch (numOfPosts) {
+                case 1:
+                    containerType = 'Type-One';
+                    break;
+                case 2:
+                    containerType = 'Type-Two';
+                    break;
+                case 3:
+                    containerType = 'Type-Three';
+                    break;
+                case 4:
+                    containerType = 'Type-Four';
+                    break;
+                default:
+                    if (numOfPosts >= 5) {
+                        containerType = 'Type-Five';
+                    }
+                    break;
+            }
+        }
+    
+        try {
+            // For each selected post, ensure the correct ID is used
+            const updatedPosts = selectedPosts.map(post => ({
+                postId: post.value, // This should be the post ID
+                includeInContainer: post.includeInContainer // Keep track of the container inclusion status
+            }));
+            console.log('updatedPosts', updatedPosts)
+            console.log('selectedPosts', selectedPosts)
+
+            // Step 1: For each selected post, fetch the contexts it is tagged to
+            for (const post of selectedPosts) {
+                const postId = post.value;
+                console.log('post ID', postId)
+                console.log('sel posts', selectedPosts)
+            // Fetch the contexts tagged to this post
+                const response = await axios.get(`/api/admin/posts/${postId}/contexts`, { headers: { Authorization: localStorage.getItem('token') } });
+                const taggedContexts = response.data;
+                console.log('tagged contexts', taggedContexts)
+                // Step 2: For each context, update the list of posts
+                for (const taggedContext of taggedContexts) {
+                    const updatedPosts = [...taggedContext.posts, ...selectedPosts.map(post => ({
+                        postId: post.value,
+                        includeInContainer: post.includeInContainer
+                    }))];
+    
+                    // Remove duplicate posts (postId should be unique in each context)
+                    const uniquePosts = updatedPosts.reduce((acc, curr) => {
+                        if (!acc.find(post => post.postId === curr.postId)) {
+                            acc.push(curr);
+                        }
+                        return acc;
+                    }, []);
+    
+                    // Update the context with the new list of posts
+                    await axios.put(`/api/admin/contexts/${taggedContext._id}`, {
+                        posts: uniquePosts
+                    }, { headers: { Authorization: localStorage.getItem('token') } });
+                }
+                }
+    
+            // Step 3: Proceed with saving the current context (after all contexts have been updated)
+            const formData = {
+                contextTitle,
+                isTrending,
+                sectors: selectedSectors,
+                subSectors: selectedSubSectors,
+                signalCategories: selectedSignalCategories,
+                signalSubCategories: selectedSignalSubCategories,
+                themes: selectedThemes.map(theme => theme.value), // Use the selected theme IDs
+                posts: updatedPosts, // Updated structure for posts
+                containerType,
+                bannerShow,
+                homePageShow,
+                bannerImage,
+                otherImage,
+                generalComment,
+                dataForTypeNum,
+                summary,
+                hasSlider,
+                slide1: slides.slide1,
+                slide2: slides.slide2,
+                slide3: slides.slide3,
+                slide4: slides.slide4,
+                slide5: slides.slide5,
+                slide6: slides.slide6,
+                slide7: slides.slide7,
+                slide8: slides.slide8,
+                slide9: slides.slide9,
+                slide10: slides.slide10
+            };
+    
+            // If editing an existing context, update it
+            if (contexts.editId) {
+                const response = await axios.put(`/api/admin/contexts/${contexts.editId}`, formData, { headers: { Authorization: localStorage.getItem('token') } });
+                contextsDispatch({ type: 'UPDATE_CONTEXT', payload: response.data });
+                handleFormSubmit('Context updated successfully');
+            } else {
+                // If adding a new context, create it
+                const response = await axios.post('/api/admin/contexts', formData, { headers: { Authorization: localStorage.getItem('token') } });
+                contextsDispatch({ type: 'ADD_CONTEXT', payload: response.data });
+                handleFormSubmit('Context added successfully');
+            }
+        } catch (err) {
+            console.error('Error submitting form:', err);
+            alert('An error occurred while submitting the form.');
+        }
     };
+        
+    
+    const handleHomeNav = () => {
+        setIsFormVisible(false);
+    }
 
     const handleSlideChange = (slideNumber, field, value) => {
         setSlides(prevSlides => ({
@@ -124,6 +264,18 @@ export default function ContextForm({ handleFormSubmit }) {
             }
         }));
     };
+
+    // Convert themesData into a format suitable for react-select
+    const themeOptions = themesData.data.map(theme => ({
+        value: theme._id,
+        label: theme.themeTitle
+    }));
+
+    // Convert posts into a format suitable for react-select
+    const postOptions = postsData.map(post => ({
+        value: post._id,
+        label: post.postTitle
+   }));
 
     return (
         <div className="context-form-container">
@@ -217,7 +369,94 @@ export default function ContextForm({ handleFormSubmit }) {
                         </select>
                     </div>
                 </div>
+                
+                <div className="row">
+                        <div className="column">
+                            <label htmlFor="themes"><b>Themes</b></label>
+                            <Select
+                                id="themes"
+                                isMulti
+                                options={themeOptions}
+                                value={selectedThemes}
+                                onChange={setSelectedThemes}
+                                className="context-select"
+                            />
+                        </div>
+                    </div>
+                    <div className="row">
+                    <div className="column">
+                        <label htmlFor="posts"><b>Posts</b></label>
+                        <Select
+                            id="posts"
+                            isMulti
+                            options={postOptions}
+                            value={selectedPosts}
+                            onChange={setSelectedPosts}
+                            className="context-select"
+                        />
+                    </div>
+                </div>
 
+                <div className="checkbox-container">
+                    <label htmlFor="bannerShow" className="checkbox-label"><b>Show Banner?</b></label>
+                    <input
+                        id="bannerShow"
+                        type="checkbox"
+                        checked={bannerShow}
+                        onChange={(e) => setBannerShow(e.target.checked)}
+                        className="context-checkbox"
+                    />
+                </div>
+                <div className="checkbox-container">
+                    <label htmlFor="homePageShow" className="checkbox-label"><b>Show on Homepage?</b></label>
+                    <input
+                        id="homePageShow"
+                        type="checkbox"
+                        checked={homePageShow}
+                        onChange={(e) => setHomePageShow(e.target.checked)}
+                        className="context-checkbox"
+                    />
+                </div>
+                <label htmlFor="bannerImage"><b>Banner Image URL</b></label>
+                <input
+                    id="bannerImage"
+                    type="text"
+                    placeholder="Banner Image URL"
+                    name="bannerImage"
+                    value={bannerImage}
+                    onChange={(e) => setBannerImage(e.target.value)}
+                    className="context-input"
+                />
+                <label htmlFor="otherImage"><b>Other Image URL</b></label>
+                <input
+                    id="otherImage"
+                    type="text"
+                    placeholder="Other Image URL"
+                    name="otherImage"
+                    value={otherImage}
+                    onChange={(e) => setOtherImage(e.target.value)}
+                    className="context-input"
+                />
+                <label htmlFor="generalComment"><b>General Comment</b></label>
+                <textarea
+                    id="generalComment"
+                    placeholder="General Comment"
+                    name="generalComment"
+                    value={generalComment}
+                    onChange={(e) => setGeneralComment(e.target.value)}
+                    className="context-textarea"
+                />
+                
+                <label htmlFor="dataForTypeNum"><b>Data for Type-Num</b></label>
+                <input
+                    id="dataForTypeNum"
+                    type="text"
+                    placeholder="Enter data for Type-Num"
+                    value={dataForTypeNum}
+                    onChange={(e) => setDataForTypeNum(e.target.value)}
+                    className="context-input"
+                />
+                
                 {/* Summary */}
                 <label htmlFor="summary"><b>Summary</b></label>
                 <Quill

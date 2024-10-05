@@ -9,7 +9,7 @@ export default function StoryOrder() {
     const [contexts, setContexts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [publishDate, setPublishDate] = useState('');
-    const [rank, setRank] = useState({});
+    const [rank, setRank] = useState({}); // We will update this based on fetched story orders
 
     const handleRankChange = (contextTitle, value) => {
         setRank(prevRank => ({
@@ -33,21 +33,67 @@ export default function StoryOrder() {
 
     const handleSave = async () => {
         try {
-            const storyOrders = Object.entries(rank).map(([contextTitle, contextRank]) => ({
-                publishDate,
-                contextId: contexts.find(context => context.contextTitle === contextTitle)._id,
-                rank: contextRank
-            }));
-            await axios.post('/api/admin/story-orders', storyOrders, {
+            // Fetch existing story orders for the given publishDate
+            const existingOrdersResponse = await axios.get('/api/admin/story-orders', {
+                params: { publishDate }, // Send the publishDate to check for existing records
                 headers: { Authorization: localStorage.getItem('token') }
             });
+            
+            const existingOrders = existingOrdersResponse.data; // Assuming this returns an array of existing orders
+            console.log('Existing Orders:', existingOrders); // Log to see what is being fetched
+    
+            // Prepare the new story orders
+            const storyOrders = Object.entries(rank).map(([contextTitle, contextRank]) => {
+                const contextId = contexts.find(context => context.contextTitle === contextTitle)._id;
+    
+                // Check if there's already an order with this contextId and publishDate
+                const existingOrder = existingOrders.find(order => 
+                    order.contextId.toString() === contextId.toString() && // Ensure both are strings for comparison
+                    new Date(order.publishDate).toISOString() === new Date(publishDate).toISOString() // Compare dates
+                );
+    
+                return {
+                    publishDate,
+                    contextId,
+                    rank: contextRank,
+                    _id: existingOrder ? existingOrder._id : null // Keep track of the ID if it exists
+                };
+            });
+    
+            console.log('Story Orders to save:', storyOrders); // Log to see the story orders being saved
+    
+            // Save or update story orders
+            await Promise.all(storyOrders.map(async order => {
+                if (order._id) {
+                    // Update the existing order
+                    alert('updating existing order');
 
+                    await axios.put(`/api/admin/story-orders/${order._id}`, {
+                        rank: order.rank
+                    }, {
+                        headers: { Authorization: localStorage.getItem('token') }
+                    });
+                } else {
+                    // Create a new order
+                    alert('creating new order');
+                    console.log('order', order);
+                    await axios.post('/api/admin/story-orders', {
+                        publishDate: order.publishDate,
+                        contextId: order.contextId,
+                        rank: order.rank
+                    }, {
+                        headers: { Authorization: localStorage.getItem('token') }
+                    });
+                }
+            }));
+    
             console.log('Story orders saved successfully');
         } catch (err) {
             console.error('Error saving story orders:', err);
         }
     };
-
+    
+    
     const fetchPosts = async () => {
         setLoading(true);
         try {
@@ -79,9 +125,36 @@ export default function StoryOrder() {
         }
     };
 
+    // Fetch story orders based on the selected date range
+    const fetchStoryOrders = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get('/api/admin/story-orders', {
+                params: { startDate, endDate },
+                headers: { Authorization: localStorage.getItem('token') }
+            });
+            const orders = response.data;
+
+            // Map the ranks to the contexts
+            const newRank = {};
+            orders.forEach(order => {
+                const context = contexts.find(ctx => ctx._id === order.contextId);
+                if (context) {
+                    newRank[context.contextTitle] = order.rank; // Assign the rank to the context title
+                }
+            });
+            setRank(newRank);
+        } catch (err) {
+            console.error('Error fetching story orders:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (startDate && endDate) {
             fetchPosts();
+            fetchStoryOrders(); // Fetch story orders when the date range is selected
         }
     }, [startDate, endDate]);
 
@@ -103,7 +176,8 @@ export default function StoryOrder() {
                 acc[context.contextTitle] = {
                     postTitles,
                     containerType: context.containerType,
-                    isTrending: context.isTrending
+                    isTrending: context.isTrending,
+                    rank: rank[context.contextTitle] || '' // Include the rank if available
                 };
             }
         } else {
@@ -111,7 +185,7 @@ export default function StoryOrder() {
         }
         return acc;
     }, {});
-
+console.log('rank', rank)
     return (
         <div className="story-order-container">
             <h1>Story Order</h1>
@@ -159,14 +233,13 @@ export default function StoryOrder() {
                             <tr>
                                 <th>Context Title</th>
                                 <th>Post Titles</th>
-                                <th>Container Type</th>
                                 <th>Context Trending?</th>
                                 <th>Rank</th>
                             </tr>
                         </thead>
                         <tbody>
                             {Object.entries(contextMap).length > 0 ? (
-                                Object.entries(contextMap).map(([contextTitle, { postTitles, containerType, isTrending }]) => (
+                                Object.entries(contextMap).map(([contextTitle, { postTitles, isTrending, rank }]) => (
                                     <tr key={contextTitle} className={isTrending ? 'trending-context' : ''}>
                                         <td>{contextTitle}</td>
                                         <td>
@@ -176,13 +249,12 @@ export default function StoryOrder() {
                                                 ))}
                                             </ul>
                                         </td>
-                                        <td>{containerType}</td>
                                         <td>{isTrending ? 'Yes' : 'No'}</td>
                                         <td>
                                             <input
                                                 type="number"
                                                 className="rank-input"
-                                                value={rank[contextTitle] || ''}
+                                                value={rank || ''} // Display the fetched rank
                                                 onChange={(e) => handleRankChange(contextTitle, e.target.value)}
                                             />
                                         </td>
@@ -190,7 +262,7 @@ export default function StoryOrder() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="no-data">No contexts with posts available</td>
+                                    <td colSpan="4" className="no-data">No contexts with posts available</td>
                                 </tr>
                             )}
                         </tbody>

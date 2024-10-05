@@ -15,16 +15,28 @@ storyOrdersCltr.list = async (req, res) => {
 
 storyOrdersCltr.create = async (req, res) => {
 
-    try {
-        const storyOrders = req.body; // Expecting an array
-        const savedOrders = await Promise.all(
-            storyOrders.map(order => new StoryOrder(order).save())
-        );
-        res.status(200).json(savedOrders);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    try{
+        const storyOrder = new StoryOrder(req.body)
+        await storyOrder.save()
+        res.status(201).json(storyOrder)
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error: 'something went wrong'})
     }
 }
+// update being passed as array
+// storyOrdersCltr.create = async (req, res) => {
+
+//     try {
+//         const storyOrders = req.body; // Expecting an array
+//         const savedOrders = await Promise.all(
+//             storyOrders.map(order => new StoryOrder(order).save())
+//         );
+//         res.status(200).json(savedOrders);
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// }
 
 storyOrdersCltr.update = async (req, res) => {
 

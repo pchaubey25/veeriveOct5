@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { HomeFeedContext } from '../context/HomeFeedContext'; // Assuming context is set up already
+import { HomeFeedContext } from '../../context/HomeFeedContext'; // Assuming context is set up already
 import DOMPurify from 'dompurify'; // Import DOMPurify for sanitizing HTML
 
 export default function Slider() {

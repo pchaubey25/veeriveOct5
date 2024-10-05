@@ -9,8 +9,10 @@ import UserLogin from './pages/UserLogin';
 import HomeFeed from './pages/HomeFeed';
 import Home from './pages/Home';
 import Header from './pages/Header';
-import FeedContainerTemp from './pages/FeedContainerTemp';
 import ContextDetail from './pages/ContextDetail';  // Import ContextDetail component
+import ThemeHome from './pages/ThemeHome';
+import ThemeDetail from './pages/ThemeDetail';
+import SectorHome from './pages/SectorHome';
 
 import PrivateRoute from './components/PrivateRoute'; // Ensure you are using this for protecting routes if needed
 import { HomeFeedProvider } from './context/HomeFeedContext';
@@ -33,6 +35,9 @@ function App() {
         {/* Other routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/home-feed" element={<HomeFeed />} />
+        <Route path="/theme-home" element={<ThemeHome />} />
+        <Route path="/theme/:id" element={<ThemeDetail />} />
+        <Route path="/sector-home" element={<SectorHome />} />
 
         {/* Add a route for ContextDetail */}
         <Route path="/context/:id" element={<ContextDetail />} />

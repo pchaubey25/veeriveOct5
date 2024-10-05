@@ -3,9 +3,9 @@ const themesCltr = {}
 
 themesCltr.list = async (req, res) => {
     try{
-        const allCompanies = await Theme.find({})
-        res.json(allCompanies)
-        console.log(allCompanies)
+        const allThemes = await Theme.find({})
+        res.json(allThemes)
+        console.log(allThemes)
     } catch(err) {
         console.log(err)
         res.json(err)

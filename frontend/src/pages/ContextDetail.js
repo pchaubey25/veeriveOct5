@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 import { HomeFeedContext } from '../context/HomeFeedContext';
 import { useParams } from 'react-router-dom';
-import ContextTitle from '../components/ContextTitle';
-import SectorsRow from '../components/SectorsRow';
+import ContextTitle from '../components/ContextDetail/ContextTitle';
+import SectorsRow from '../components/ContextDetail/SectorsRow';
 import ThemeTitle from '../components/ThemeTitle';
-import ScoresRow from '../components/ScoresRow';
-import Slider from '../components/Slider';
-import DisplayPostTile from '../components/DisplayPostTile'; // Import the DisplayPostTile component
+import ScoresRow from '../components/ContextDetail/ScoresRow';
+import Slider from '../components/ContextDetail/Slider';
+import DisplayPostTile from '../components/ContextDetail/DisplayPostTile'; // Import the DisplayPostTile component
 import '../html/css/DisplayPostTile.css'; // Import the CSS file for styling the DisplayPostTile component
 
 const ContextDetail = () => {
