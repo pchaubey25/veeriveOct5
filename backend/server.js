@@ -32,8 +32,9 @@ const app = express()
 app.use(express.json())
 //app.use(cors())
 app.use(cors({
-  origin: 'https://veerive-oct7.vercel.app/', // Allow Vercel frontend to access the backend
-  credentials: true
+   origin: '*',
+  // origin: 'https://veerive-oct7.vercel.app/', // Allow Vercel frontend to access the backend
+  //credentials: true
 }));
 
 configDB()
