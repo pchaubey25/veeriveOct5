@@ -31,10 +31,16 @@ dotenv.config()
 const app = express()
 app.use(express.json())
 //app.use(cors())
-app.use(cors({
-   origin: '*',
+//app.use(cors({
+  // origin: '*',
   // origin: 'https://veerive-oct7.vercel.app/', // Allow Vercel frontend to access the backend
   //credentials: true
+//}));
+app.use(cors({
+  origin: 'https://veerive-oct7.vercel.app', // Allow your Vercel frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+  credentials: true, // Allow cookies and credentials if needed
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
 }));
 app.options('*', cors()); // Allow preflight requests on all routes
 configDB()
