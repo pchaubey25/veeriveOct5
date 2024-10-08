@@ -15,7 +15,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { SourceProvider } from './components/SourceProvider';
 import { ContextProvider } from './components/ContextProvider';
 import { PostProvider } from './components/PostProvider';
-import { ContainerProvider } from './components/ContainerProvider';
+//import { ContainerProvider } from './components/ContainerProvider';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import HeaderComponent from './pages/HeaderComponent';
@@ -50,7 +50,6 @@ function App() {
                     <ThemeProvider>
                         <ContextProvider>
                           <PostProvider>
-                            <ContainerProvider>
                           <div>
                             {state.isLoggedIn && <HeaderComponent />}
                             
@@ -141,7 +140,6 @@ function App() {
 
                             <ToastContainer />
                           </div>
-                          </ContainerProvider>
                         </PostProvider>
                       </ContextProvider>
                     </ThemeProvider>
