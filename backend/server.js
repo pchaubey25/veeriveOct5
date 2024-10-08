@@ -36,7 +36,7 @@ app.use(cors({
   // origin: 'https://veerive-oct7.vercel.app/', // Allow Vercel frontend to access the backend
   //credentials: true
 }));
-
+app.options('*', cors()); // Allow preflight requests on all routes
 configDB()
 
 // register route
