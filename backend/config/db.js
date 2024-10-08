@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const configDB = async () => {
 
-    const dbConnection = await mongoose.connect(process.env.DB_URL)
+    const dbConnection = await mongoose.connect('mongodb+srv://chaubeyp:ConsTrack360@veerive.tta8g.mongodb.net/?retryWrites=true&w=majority&appName=veerive')
     const dbName = dbConnection.connection.name
     console.log('connected to database', dbName)
 }
