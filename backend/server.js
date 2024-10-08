@@ -40,7 +40,7 @@ app.use(cors({
 configDB()
 
 // register route
-    app.post('/api/users/register', registerCltr.create )
+//    app.post('/api/users/register', registerCltr.create )
 
 // // user routes
 //app.get('/', (req, res) => {
