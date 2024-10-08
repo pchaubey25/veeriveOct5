@@ -43,9 +43,9 @@ configDB()
     app.post('/api/users/register', registerCltr.create )
 
 // // user routes
-app.get('/', (req, res) => {
-  res.send('Hello from Render backend!');
-});
+//app.get('/', (req, res) => {
+//  res.send('Hello from Render backend!');
+//});
 
 app.post('/api/users/register', usersCltr.register)
 app.post('/api/users/login', usersCltr.login)
