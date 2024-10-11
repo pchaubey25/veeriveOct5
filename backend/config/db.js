@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-//const mongoURI = 'mongodb+srv://chaubeyp:ConsTrack360@veerive.tta8g.mongodb.net/veerive-db?retryWrites=true&w=majority&appName=veerive';
+const mongoURI = 'mongodb+srv://chaubeyp:ConsTrack360@veerive.tta8g.mongodb.net/veerive-db?retryWrites=true&w=majority&appName=veerive';
 //const mongoURI = process.env.DB_URL
 
 //for local machine ===============
