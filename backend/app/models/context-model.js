@@ -2,6 +2,7 @@ import {Schema, model} from 'mongoose'
 
 const contextSchema = new Schema ({
     contextTitle: { type: String, required: true },
+    date: { type: Date, required: true },       
     isTrending: {type: Boolean, default: false},
     sectors: [{ type: Schema.Types.ObjectId, ref: 'Sector', required: true}],
     subSectors: [{ type: Schema.Types.ObjectId, ref: 'SubSector', required: false}],

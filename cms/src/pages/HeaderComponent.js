@@ -88,7 +88,6 @@ const HeaderComponent = () => {
                     onClose={handleClose}
                 >
                     <MenuItem onClick={() => handleMenuItemClick('/posts')}>Post</MenuItem>
-                    <MenuItem onClick={() => handleMenuItemClick('/container-module')}>Container Module</MenuItem>
                     <MenuItem onClick={() => handleMenuItemClick('/story-order')}>Story Order</MenuItem>
                     <MenuItem onClick={() => handleMenuItemClick('/story-view')}>Story View</MenuItem>
 

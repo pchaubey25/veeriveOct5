@@ -11,6 +11,8 @@ export default function ContextForm({ handleFormSubmit }) {
     
     // State for form inputs
     const [contextTitle, setContextTitle] = useState('');
+    const [date, setDate] = useState(''); // New state for date field
+    const [containerType, setContainerType] = useState('Type-One'); // New state for container type
     const [isTrending, setIsTrending] = useState(false);
     const [selectedSectors, setSelectedSectors] = useState([]);
     const [selectedSubSectors, setSelectedSubSectors] = useState([]);
@@ -45,6 +47,8 @@ export default function ContextForm({ handleFormSubmit }) {
 
             if (context) {
                 setContextTitle(context.contextTitle);
+                setDate(new Date(context.date).toISOString().substring(0, 10)); // Set the date field
+                setContainerType(context.containerType || 'Type-One'); // Set container type
                 setIsTrending(context.isTrending);
                 setSelectedSectors(context.sectors || []);
                 setSelectedSubSectors(context.subSectors || []);
@@ -89,6 +93,8 @@ export default function ContextForm({ handleFormSubmit }) {
             }
         } else {
             setContextTitle('');
+            setDate('');
+            setContainerType('');
             setIsTrending(false);
             setSelectedSectors([]);
             setSelectedSubSectors([]);
@@ -135,32 +141,32 @@ export default function ContextForm({ handleFormSubmit }) {
         e.preventDefault();
         
         // Determine the container type based on the number of posts and dataForTypeNum
-        let containerType = 'Type-One'; // Default
+       // let containerType = 'Type-One'; // Default
         const numOfPosts = selectedPosts.length;
     
-        if (dataForTypeNum) {
-            containerType = 'Type-Num';
-        } else {
-            switch (numOfPosts) {
-                case 1:
-                    containerType = 'Type-One';
-                    break;
-                case 2:
-                    containerType = 'Type-Two';
-                    break;
-                case 3:
-                    containerType = 'Type-Three';
-                    break;
-                case 4:
-                    containerType = 'Type-Four';
-                    break;
-                default:
-                    if (numOfPosts >= 5) {
-                        containerType = 'Type-Five';
-                    }
-                    break;
-            }
-        }
+        // if (dataForTypeNum) {
+        //     containerType = 'Type-Num';
+        // } else {
+        //     switch (numOfPosts) {
+        //         case 1:
+        //             containerType = 'Type-One';
+        //             break;
+        //         case 2:
+        //             containerType = 'Type-Two';
+        //             break;
+        //         case 3:
+        //             containerType = 'Type-Three';
+        //             break;
+        //         case 4:
+        //             containerType = 'Type-Four';
+        //             break;
+        //         default:
+        //             if (numOfPosts >= 5) {
+        //                 containerType = 'Type-Five';
+        //             }
+        //             break;
+        //     }
+        // }
     
         try {
             // For each selected post, ensure the correct ID is used
@@ -205,6 +211,8 @@ export default function ContextForm({ handleFormSubmit }) {
             // Step 3: Proceed with saving the current context (after all contexts have been updated)
             const formData = {
                 contextTitle,
+                date,
+                containerType,
                 isTrending,
                 sectors: selectedSectors,
                 subSectors: selectedSubSectors,
@@ -212,7 +220,6 @@ export default function ContextForm({ handleFormSubmit }) {
                 signalSubCategories: selectedSignalSubCategories,
                 themes: selectedThemes.map(theme => theme.value), // Use the selected theme IDs
                 posts: updatedPosts, // Updated structure for posts
-                containerType,
                 bannerShow,
                 homePageShow,
                 bannerImage,
@@ -250,7 +257,15 @@ export default function ContextForm({ handleFormSubmit }) {
         }
     };
         
-    
+    const containerTypeOptions = [
+        { value: 'Type-One', label: 'Type-One' },
+        { value: 'Type-Two', label: 'Type-Two' },
+        { value: 'Type-Three', label: 'Type-Three' },
+        { value: 'Type-Four', label: 'Type-Four' },
+        { value: 'Type-Five', label: 'Type-Five' },
+        { value: 'Type-Num', label: 'Type-Num' },
+    ];
+
     const handleHomeNav = () => {
         setIsFormVisible(false);
     }
@@ -291,6 +306,29 @@ export default function ContextForm({ handleFormSubmit }) {
                     className="context-input"
                     required
                 />
+
+                 {/* Date Field */}
+                 <label htmlFor="date"><b>Date</b></label>
+                <input
+                    id="date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="context-input"
+                    required
+                />
+
+                {/* Container Type Dropdown */}
+                <label htmlFor="containerType"><b>Container Type</b></label>
+                <Select
+                    id="containerType"
+                    options={containerTypeOptions}
+                    value={containerTypeOptions.find(option => option.value === containerType)}
+                    onChange={(selectedOption) => setContainerType(selectedOption.value)}
+                    className="context-select"
+                    required
+                />
+
                 <div className="checkbox-container">
                     <label htmlFor="isTrending" className="checkbox-label"><b>Is Trending?</b></label>
                     <input
