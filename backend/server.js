@@ -32,31 +32,31 @@ const app = express()
 app.use(express.json())
 // app.use(cors())
 
-app.use(cors({
-   origin: 'https://veerive-frontend.vercel.app', // Allow your Vercel frontend
-   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-   credentials: true, // Allow cookies and credentials if needed
-   allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
- }));
-
-//const allowedOrigins = [
-//   'https://veerive-oct7.vercel.app',
-//   'https://veerive-frontend.vercel.app'
-//];
-
-//app.use(cors({
-//   origin: (origin, callback) => {
-//     // If the request origin is in the allowedOrigins array or is undefined (for server-to-server requests), allow it
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
+// app.use(cors({
+//   origin: 'https://veerive-frontend.vercel.app', // Allow your Vercel frontend
 //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-//   credentials: true, // Allow credentials (e.g., cookies, authorization headers)
-//   allowedHeaders: ['Content-Type', 'Authorization'] // Allow specific headers
-//}));
+//   credentials: true, // Allow cookies and credentials if needed
+//   allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+// }));
+
+const allowedOrigins = [
+  'https://veerive-oct7.vercel.app',
+  'https://veerive-frontend.vercel.app'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // If the request origin is in the allowedOrigins array or is undefined (for server-to-server requests), allow it
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+  credentials: true, // Allow credentials (e.g., cookies, authorization headers)
+  allowedHeaders: ['Content-Type', 'Authorization'] // Allow specific headers
+}));
 
 app.options('*', cors()); // Allow preflight requests on all routes
 
