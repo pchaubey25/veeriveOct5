@@ -156,9 +156,21 @@ export default function ContextList() {
                 <thead>
                     <tr>
                         {/* Table headers with sorting functionality */}
+                        <th onClick={() => requestSort('date')}>
+                            Date {sortConfig.key === 'date' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
+                        </th>
+                            
                         <th onClick={() => requestSort('contextTitle')}>
                             Context Title {sortConfig.key === 'contextTitle' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
                         </th>
+
+                         <th onClick={() => requestSort('displayOrder')}>
+                            Context Display Order {sortConfig.key === 'displayOrder' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
+                        </th>
+                        <th onClick={() => requestSort('containerType')}>
+                            Context Container Type {sortConfig.key === 'containerType' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
+                        </th>
+                            
                         <th onClick={() => requestSort('sectors')}>
                             Sectors {sortConfig.key === 'sectors' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
                         </th>
@@ -179,7 +191,10 @@ export default function ContextList() {
                     {/* Table body with context data */}
                     {filteredContexts.map(ele => (
                         <tr key={ele._id}>
+                            <td>{ele.date}</td>
                             <td>{ele.contextTitle}</td>
+                            <td>{ele.displayOrder}</td>
+                            <td>{ele.containerType}</td>
                             <td>{getSectorNames(ele.sectors, sectors.data)}</td>
                             <td>{getSubSectorNames(ele.subSectors, subSectors.data)}</td>
                             <td>{getSignalNames(ele.signalCategories, signals.data)}</td>
