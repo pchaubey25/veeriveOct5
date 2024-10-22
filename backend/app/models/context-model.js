@@ -4,6 +4,7 @@ const contextSchema = new Schema ({
     contextTitle: { type: String, required: true },
     date: { type: Date, required: true },       
     isTrending: {type: Boolean, default: false},
+    displayOrder: {type: Number, default: 0},
     sectors: [{ type: Schema.Types.ObjectId, ref: 'Sector', required: true}],
     subSectors: [{ type: Schema.Types.ObjectId, ref: 'SubSector', required: false}],
     signalCategories: [{type: Schema.Types.ObjectId, ref: 'Signal', required: true}],
