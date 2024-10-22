@@ -14,6 +14,7 @@ export default function ContextForm({ handleFormSubmit }) {
     const [date, setDate] = useState(''); // New state for date field
     const [containerType, setContainerType] = useState('Type-One'); // New state for container type
     const [isTrending, setIsTrending] = useState(false);
+    const [displayOrder, setDisplayOrder] = useState(0);
     const [selectedSectors, setSelectedSectors] = useState([]);
     const [selectedSubSectors, setSelectedSubSectors] = useState([]);
     const [selectedSignalCategories, setSelectedSignalCategories] = useState([]);
@@ -50,6 +51,7 @@ export default function ContextForm({ handleFormSubmit }) {
                 setDate(new Date(context.date).toISOString().substring(0, 10)); // Set the date field
                 setContainerType(context.containerType || 'Type-One'); // Set container type
                 setIsTrending(context.isTrending);
+                setDisplayOrder(context.displayOrder);
                 setSelectedSectors(context.sectors || []);
                 setSelectedSubSectors(context.subSectors || []);
                 setSelectedSignalCategories(context.signalCategories || []);
@@ -214,6 +216,7 @@ export default function ContextForm({ handleFormSubmit }) {
                 date,
                 containerType,
                 isTrending,
+                displayOrder,
                 sectors: selectedSectors,
                 subSectors: selectedSubSectors,
                 signalCategories: selectedSignalCategories,
@@ -239,7 +242,7 @@ export default function ContextForm({ handleFormSubmit }) {
                 slide9: slides.slide9,
                 slide10: slides.slide10
             };
-    
+            console.log('formData', formData)
             // If editing an existing context, update it
             if (contexts.editId) {
                 const response = await axios.put(`/api/admin/contexts/${contexts.editId}`, formData, { headers: { Authorization: localStorage.getItem('token') } });
@@ -340,6 +343,16 @@ export default function ContextForm({ handleFormSubmit }) {
                     />
                 </div>
 
+                    <div >
+                        <label htmlFor="displayOrder"><b>Display Order</b></label>
+                        <input
+                            id="displayOrder"
+                            type="number"
+                            placeholder="Display Order"
+                            value={displayOrder}
+                            onChange={(e) => setDisplayOrder(Number(e.target.value))}
+                        />
+                    </div>
                 {/* Sectors and Sub-Sectors in one row */}
                 <div className="row">
                     <div className="column">
