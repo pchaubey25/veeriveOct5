@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from 'react'; // Importing necessary hooks and components from React
+import React, { useContext, useState, useMemo, useEffect } from 'react'; // Importing necessary hooks and components from React
 import ContextContext from '../../context/ContextContext'; // Importing the context for managing global state
 import axios from '../../config/axios'; // Importing axios instance for making HTTP requests
 import '../../html/css/Context.css'; // Importing the CSS file for styling the component
@@ -11,6 +11,24 @@ export default function ContextList() {
     // Local state to manage the search query and sorting configuration
     const [searchQuery, setSearchQuery] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: 'contextTitle', direction: 'ascending' });
+
+
+    // Fetch contexts from the API on component mount or when the context changes
+    useEffect(() => {
+        const fetchContexts = async () => {
+            try {
+                const response = await axios.get('/api/admin/contexts', {
+                    headers: { Authorization: localStorage.getItem('token') },
+                });
+                contextsDispatch({ type: 'SET_CONTEXTS', payload: response.data }); // Update context state with fetched data
+            } catch (error) {
+                console.error('Error fetching contexts:', error);
+                // Handle error as needed
+            }
+        };
+
+        fetchContexts();
+    }, [contextsDispatch]); // Only run on mount
 
     // Helper function to get sector names from IDs
     const getSectorNames = (ids, data) => {
@@ -159,18 +177,16 @@ export default function ContextList() {
                         <th onClick={() => requestSort('date')}>
                             Date {sortConfig.key === 'date' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
                         </th>
-                            
+
                         <th onClick={() => requestSort('contextTitle')}>
                             Context Title {sortConfig.key === 'contextTitle' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
                         </th>
-
-                         <th onClick={() => requestSort('displayOrder')}>
+                        <th onClick={() => requestSort('displayOrder')}>
                             Context Display Order {sortConfig.key === 'displayOrder' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
                         </th>
                         <th onClick={() => requestSort('containerType')}>
                             Context Container Type {sortConfig.key === 'containerType' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
                         </th>
-                            
                         <th onClick={() => requestSort('sectors')}>
                             Sectors {sortConfig.key === 'sectors' && (sortConfig.direction === 'ascending' ? '🔼' : '🔽')}
                         </th>
