@@ -141,76 +141,44 @@ export default function ContextForm({ handleFormSubmit }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Determine the container type based on the number of posts and dataForTypeNum
-       // let containerType = 'Type-One'; // Default
-        const numOfPosts = selectedPosts.length;
-    
-        // if (dataForTypeNum) {
-        //     containerType = 'Type-Num';
-        // } else {
-        //     switch (numOfPosts) {
-        //         case 1:
-        //             containerType = 'Type-One';
-        //             break;
-        //         case 2:
-        //             containerType = 'Type-Two';
-        //             break;
-        //         case 3:
-        //             containerType = 'Type-Three';
-        //             break;
-        //         case 4:
-        //             containerType = 'Type-Four';
-        //             break;
-        //         default:
-        //             if (numOfPosts >= 5) {
-        //                 containerType = 'Type-Five';
-        //             }
-        //             break;
-        //     }
-        // }
     
         try {
-            // For each selected post, ensure the correct ID is used
             const updatedPosts = selectedPosts.map(post => ({
-                postId: post.value, // This should be the post ID
-                includeInContainer: post.includeInContainer // Keep track of the container inclusion status
+                postId: post.value,
+                includeInContainer: post.includeInContainer || false, // Preserve includeInContainer
             }));
-            console.log('updatedPosts', updatedPosts)
-            console.log('selectedPosts', selectedPosts)
-
-            // Step 1: For each selected post, fetch the contexts it is tagged to
-            for (const post of selectedPosts) {
-                const postId = post.value;
-                console.log('post ID', postId)
-                console.log('sel posts', selectedPosts)
-            // Fetch the contexts tagged to this post
-                const response = await axios.get(`/api/admin/posts/${postId}/contexts`, { headers: { Authorization: localStorage.getItem('token') } });
-                const taggedContexts = response.data;
-                console.log('tagged contexts', taggedContexts)
-                // Step 2: For each context, update the list of posts
-                for (const taggedContext of taggedContexts) {
-                    const updatedPosts = [...taggedContext.posts, ...selectedPosts.map(post => ({
-                        postId: post.value,
-                        includeInContainer: post.includeInContainer
-                    }))];
     
-                    // Remove duplicate posts (postId should be unique in each context)
-                    const uniquePosts = updatedPosts.reduce((acc, curr) => {
-                        if (!acc.find(post => post.postId === curr.postId)) {
-                            acc.push(curr);
-                        }
-                        return acc;
-                    }, []);
+            // Step 1: Fetch existing contexts tagged to each selected post
+            const existingContextUpdates = await Promise.all(
+                selectedPosts.map(async (post) => {
+                    const postId = post.value;
+                    const response = await axios.get(`/api/admin/posts/${postId}/contexts`, {
+                        headers: { Authorization: localStorage.getItem('token') },
+                    });
+                    return response.data; // tagged contexts for the post
+                })
+            );
+    
+            // Step 2: Update contexts with merged posts
+            for (const taggedContexts of existingContextUpdates) {
+                for (const taggedContext of taggedContexts) {
+                    // Merge existing posts with new selected posts
+                    const existingPosts = taggedContext.posts || [];
+                    const mergedPosts = [...existingPosts, ...updatedPosts];
+    
+                    // Remove duplicates
+                    const uniquePosts = Array.from(
+                        new Map(mergedPosts.map(post => [post.postId, post])).values()
+                    );
     
                     // Update the context with the new list of posts
                     await axios.put(`/api/admin/contexts/${taggedContext._id}`, {
-                        posts: uniquePosts
+                        posts: uniquePosts,
                     }, { headers: { Authorization: localStorage.getItem('token') } });
                 }
-                }
+            }
     
-            // Step 3: Proceed with saving the current context (after all contexts have been updated)
+            // Step 3: Save or update the current context
             const formData = {
                 contextTitle,
                 date,
@@ -221,8 +189,8 @@ export default function ContextForm({ handleFormSubmit }) {
                 subSectors: selectedSubSectors,
                 signalCategories: selectedSignalCategories,
                 signalSubCategories: selectedSignalSubCategories,
-                themes: selectedThemes.map(theme => theme.value), // Use the selected theme IDs
-                posts: updatedPosts, // Updated structure for posts
+                themes: selectedThemes.map(theme => theme.value),
+                posts: updatedPosts,
                 bannerShow,
                 homePageShow,
                 bannerImage,
@@ -240,17 +208,19 @@ export default function ContextForm({ handleFormSubmit }) {
                 slide7: slides.slide7,
                 slide8: slides.slide8,
                 slide9: slides.slide9,
-                slide10: slides.slide10
+                slide10: slides.slide10,
             };
-            console.log('formData', formData)
-            // If editing an existing context, update it
+    
             if (contexts.editId) {
-                const response = await axios.put(`/api/admin/contexts/${contexts.editId}`, formData, { headers: { Authorization: localStorage.getItem('token') } });
+                const response = await axios.put(`/api/admin/contexts/${contexts.editId}`, formData, {
+                    headers: { Authorization: localStorage.getItem('token') },
+                });
                 contextsDispatch({ type: 'UPDATE_CONTEXT', payload: response.data });
                 handleFormSubmit('Context updated successfully');
             } else {
-                // If adding a new context, create it
-                const response = await axios.post('/api/admin/contexts', formData, { headers: { Authorization: localStorage.getItem('token') } });
+                const response = await axios.post('/api/admin/contexts', formData, {
+                    headers: { Authorization: localStorage.getItem('token') },
+                });
                 contextsDispatch({ type: 'ADD_CONTEXT', payload: response.data });
                 handleFormSubmit('Context added successfully');
             }
