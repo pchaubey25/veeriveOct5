@@ -6,7 +6,6 @@ export const HomeFeedContext = createContext();
 
 // Create Provider
 export const HomeFeedProvider = ({ children }) => {
-  const [stories, setStories] = useState([]);
   const [contexts, setContexts] = useState([]);
   const [posts, setPosts] = useState([]);
   const [sectors, setSectors] = useState([]);
@@ -20,75 +19,36 @@ export const HomeFeedProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch story orders
-        const response = await axios.get('/api/story-orders', { headers: { 'Authorization': localStorage.getItem('token') } });
-        const fetchedStories = response.data;
-
-        // Sort stories
-        fetchedStories.sort((a, b) => {
-          if (b.publishDate === a.publishDate) {
-            return a.rank - b.rank;
-          }
-          return new Date(b.publishDate) - new Date(a.publishDate);
-        });
-
-        setStories(fetchedStories);
-      } catch (error) {
-        console.error('Error fetching story orders:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
     const fetchContexts = async () => {
       try {
-        const contextIds = [...new Set(stories.map(story => story.contextId))];
-        const response = await axios.get('/api/contexts', { headers: { 'Authorization': localStorage.getItem('token') } });
+        const response = await axios.get('/api/contexts', { 
+          headers: { 'Authorization': localStorage.getItem('token') } 
+        });
         const allContexts = response.data;
-        const filteredContexts = allContexts.filter(context => contextIds.includes(context._id));
-        setContexts(filteredContexts);
+        setContexts(allContexts);
       } catch (error) {
         console.error('Error fetching contexts:', error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
-    if (stories.length > 0) {
-      fetchContexts();
-    }
-  }, [stories]);
+    fetchContexts(); // Call the fetch function
+  }, []);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const postIds = contexts.flatMap(context => context.posts.map(post => post.postId));
-        const response = await axios.get('/api/posts', { headers: { 'Authorization': localStorage.getItem('token') } });
-        const allPosts = response.data;
-        const filteredPosts = allPosts.filter(post => postIds.includes(post._id));
-        setPosts(filteredPosts);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      }
-    };
-
-    if (contexts.length > 0) {
-      fetchPosts();
-    }
-  }, [contexts]);
 
   useEffect(() => {
     const fetchAdditionalData = async () => {
       try {
-        const [sectorsRes, subSectorsRes, themesRes, signalCategoriesRes, subSignalCategoriesRes, countriesRes] = await Promise.all([
+        const [sectorsRes, subSectorsRes, themesRes, signalCategoriesRes, subSignalCategoriesRes, countriesRes, postsRes] = await Promise.all([
           axios.get('/api/sectors', { headers: { 'Authorization': localStorage.getItem('token') } }),
           axios.get('/api/sub-sectors', { headers: { 'Authorization': localStorage.getItem('token') } }),
           axios.get('/api/themes', { headers: { 'Authorization': localStorage.getItem('token') } }),
           axios.get('/api/signals', { headers: { 'Authorization': localStorage.getItem('token') } }),
           axios.get('/api/sub-signals', { headers: { 'Authorization': localStorage.getItem('token') } }),
-          axios.get('/api/countries', { headers: { 'Authorization': localStorage.getItem('token') } })
+          axios.get('/api/countries', { headers: { 'Authorization': localStorage.getItem('token') } }),
+          axios.get('/api/posts', { headers: { 'Authorization': localStorage.getItem('token') } })
+
         ]);
 
         setSectors(sectorsRes.data);
@@ -97,9 +57,8 @@ export const HomeFeedProvider = ({ children }) => {
         setSignalCategories(signalCategoriesRes.data);
         setSubSignalCategories(subSignalCategoriesRes.data);
         setCountries(countriesRes.data);
-
-        // Set loading to false once all data is fetched
-        setLoading(false);
+        setPosts(postsRes.data);
+        setLoading(false); // Set loading to false once all data is fetched
       } catch (error) {
         console.error('Error fetching additional data:', error);
         setLoading(false); // In case of error, stop loading
@@ -108,14 +67,49 @@ export const HomeFeedProvider = ({ children }) => {
 
     fetchAdditionalData();
   }, []);
+
+  // Create a lookup map for all data modules
+  const sectorMap = sectors.reduce((map, sector) => {
+    map[sector._id] = sector.sectorName; 
+    return map;
+  }, {});
+
+  const subSectorMap = subSectors.reduce((map, subSector) => {
+    map[subSector._id] = subSector.subSectorName; 
+    return map;
+  }, {});
+
+  const signalCategoriesMap = signalCategories.reduce((map, signalCategory) => {
+    map[signalCategory._id] = signalCategory.signalName; 
+    return map;
+  }, {});
+
+  const subSignalCategoriesMap = subSignalCategories.reduce((map, subSignalCategory) => {
+    map[subSignalCategory._id] = subSignalCategory.subSignalName; 
+    return map;
+  }, {});
+
+  const themeMap = themes.reduce((map, theme) => {
+    map[theme._id] = theme.themeTitle; 
+    return map;
+  }, {});
+
+  const countryMap = countries.reduce((map, country) => {
+    map[country._id] = country.countryName; 
+    return map;
+  }, {});
+
+  console.log('posts', posts)
   
+
   return (
     <HomeFeedContext.Provider value={{ 
-      stories, 
-      contexts, 
+      contexts,
       posts, 
-      sectors, 
+      sectors,
+      sectorMap,
       subSectors, 
+      subSectorMap,
       themes, 
       signalCategories, 
       subSignalCategories, 
