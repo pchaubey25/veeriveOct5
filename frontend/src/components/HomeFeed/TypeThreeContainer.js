@@ -1,46 +1,55 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import '../../html/css/TypeThreeContainer.css';
+import { HomeFeedContext } from '../../context/HomeFeedContext';
 
-export default function TypeThreeContainer({
-  contextTitle,
-  summary,
-  postTitles,
-  bannerShow,
-  homePageShow,
-  themes,
-}) {
+export default function TypeThreeContainer({ context }) {
+  const { sectorMap, subSectorMap, posts } = useContext(HomeFeedContext); // Access posts from context
+  const { sectors, subSectors, contextTitle } = context;
+
+  // Map the IDs to their respective names for bullet points or additional information
+  const sectorNames = sectors.map(id => sectorMap[id]).filter(Boolean);
+  const subSectorNames = subSectors.map(id => subSectorMap[id]).filter(Boolean);
+
+  // Fetch the relevant posts based on context
+  const relatedPostIds = context.posts.map(post => post.postId); // Extract post IDs tagged to the context
+
+  // Filter and sort posts by date
+  const filteredPosts = posts.filter(post => 
+    relatedPostIds.includes(post._id) && post.includeInContainer // Check for matching IDs and includeInContainer
+  );
+
+  // Sort by date (most recent first)
+  const sortedPosts = filteredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  // Get the first three posts for rendering in related articles
+  const selectedPosts = sortedPosts.slice(0, 3); // Adjust this based on your need
+
   return (
-    <div className="container">
-      <div className="header">
-        {bannerShow && <span className="exclusive-label">EXCLUSIVE</span>}
-        <h1 className="headline">{contextTitle || 'Default Headline'}</h1>
-        <div className="bullet-list" dangerouslySetInnerHTML={{ __html: summary }} />
+    <article>
+      <div className="exclusive">EXCLUSIVE</div>
+      <h1 className="main-headline">{contextTitle}</h1> {/* Dynamic context title */}
+      
+      <ul className="bullet-points">
+        {sectorNames.length > 0 ? (
+          sectorNames.map((name, index) => (
+            <li key={index}>{name}</li> // Render bullet points from sectors
+          ))
+        ) : (
+          <li>No sectors available</li> // Fallback if no sectors are available
+        )}
+      </ul>
 
-      </div>
-
-      <div className="card-grid">
-        {postTitles.slice(0, 3).map((title, index) => (
-          <div className="card" key={index}>
-            <div className="card-content">
-              <h2 className="card-title">{title}</h2>
+      <div className="related-articles">
+        {selectedPosts.length > 0 ? (
+          selectedPosts.map((post, index) => (
+            <div className="article" key={post._id}>
+              <h2 className="article-headline">{post.postTitle || "No Title Available"}</h2> {/* Render post title */}
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No related articles found.</p> // Fallback if no posts are available
+        )}
       </div>
-
-      {/* Show theme-related content if themes are available 
-      {themes.length > 0 && (
-        <div className="themes-section">
-          <h3>Themes:</h3>
-          <ul>
-            {themes.map((theme, index) => (
-              <li key={index}>{theme}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      */}
-
-    </div>
+    </article>
   );
 }
