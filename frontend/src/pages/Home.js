@@ -1,7 +1,7 @@
-import HomeTop from './HomeTop'
-import Header from './Header'
-import HomeTrendingEvents from './HomeTrendingEvents'
-import HomeTrendingStats from './HomeTrendingStats'
+import HomeTop from '../components/Home/HomeTop'
+import Header from '../components/Home/Header'
+import HomeTrendingEvents from '../components/Home/HomeTrendingEvents'
+import HomeTrendingStats from '../components/Home/HomeTrendingStats'
 
 
 export default function Home(){
