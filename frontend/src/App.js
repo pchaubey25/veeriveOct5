@@ -8,7 +8,7 @@ import Register from './pages/Register';
 import UserLogin from './pages/UserLogin';
 import HomeFeed from './pages/HomeFeed';
 import Home from './pages/Home';
-import Header from './pages/Header';
+import Header from './components/Home/Header';
 import ContextDetail from './pages/ContextDetail';  // Import ContextDetail component
 import ThemeHome from './pages/ThemeHome';
 import ThemeDetail from './pages/ThemeDetail';
